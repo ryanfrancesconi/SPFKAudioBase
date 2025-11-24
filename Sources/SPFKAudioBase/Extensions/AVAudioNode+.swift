@@ -84,7 +84,7 @@ extension AVAudioNode {
     }
 
     /// Disconnect without breaking other connections.
-    public func disconnect(input: AVAudioNode) throws {
+    public func disconnect(input: AVAudioNode) async throws {
         guard let engine else {
             throw error(function: #function, string: "engine is nil")
         }
@@ -103,8 +103,9 @@ extension AVAudioNode {
         for (node, connections) in newConnections {
             if connections.isEmpty {
                 engine.disconnectNodeOutput(node)
+                
             } else {
-                engine.connect(node, to: connections, fromBus: 0, format: AudioDefaults.systemFormat)
+                engine.connect(node, to: connections, fromBus: 0, format: await AudioDefaults.shared.systemFormat)
             }
         }
     }

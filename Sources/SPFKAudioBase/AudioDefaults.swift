@@ -1,42 +1,55 @@
 import AVFoundation
 import SPFKBase
 
-public enum AudioDefaults {
-    public static let defaultSampleRate: Double = 48000
-
-    public static var minimumSampleRateSupported: Double = 44100
-
-    public static var enforceMinimumSamplateRate = false
-
-    private static var _systemFormat = AVAudioFormat(
-        standardFormatWithSampleRate: defaultSampleRate,
+public actor AudioDefaults {
+    private static let defaultFormat: AVAudioFormat = .init(
+        standardFormatWithSampleRate: 48000,
         channels: 2
     ) ?? AVAudioFormat()
 
-    public static func isSupported(sampleRate: Double) -> Bool {
+    public static let shared = AudioDefaults()
+    private init() {
+    }
+
+    public private(set) var minimumSampleRateSupported: Double = 44100
+    public private(set) var enforceMinimumSamplateRate = false
+
+    public private(set) lazy var systemFormat: AVAudioFormat = AudioDefaults.defaultFormat
+
+    /// Snapshot intended for nonisolated reads; bypasses actor isolation.
+    public private(set) nonisolated(unsafe) var unsafeSystemFormat: AVAudioFormat = AudioDefaults.defaultFormat
+
+    public var sampleRate: Double {
+        systemFormat.sampleRate
+    }
+
+    /// Update to sync to the current device
+    public func update(systemFormat newValue: AVAudioFormat) {
+        guard newValue.sampleRate >= minimumSampleRateSupported else {
+            Log.debug(newValue.sampleRate, "isn't a supported sample rate, so ignoring this setting")
+            return
+        }
+
+        systemFormat = newValue
+
+        unsafeSystemFormat = newValue
+    }
+
+    public func isSupported(sampleRate: Double) -> Bool {
         guard enforceMinimumSamplateRate else {
             return sampleRate > 0
         }
 
-        return sampleRate >= AudioDefaults.minimumSampleRateSupported
+        return sampleRate >= minimumSampleRateSupported
     }
 
-    public static var systemFormat: AVAudioFormat {
-        get { _systemFormat }
-        set {
-            guard newValue.sampleRate >= minimumSampleRateSupported else {
-                Log.debug(newValue.sampleRate, "isn't a supported sample rate, so ignoring this setting")
-                return
-            }
+    public func update(minimumSampleRateSupported: Double) {
+        guard minimumSampleRateSupported > 0 else { return }
 
-            _systemFormat = newValue
-        }
+        self.minimumSampleRateSupported = minimumSampleRateSupported
     }
 
-    public static var sampleRate: Double {
-        systemFormat.sampleRate
+    public func update(enforceMinimumSamplateRate: Bool) {
+        self.enforceMinimumSamplateRate = enforceMinimumSamplateRate
     }
 }
-
-public let kAudioUnitManufacturer_Spongefork: FourCharCode = "spfk".fourCC ?? 0
-public let kAudioUnitManufacturer_AudioKit: FourCharCode = "AuKt".fourCC ?? 0
