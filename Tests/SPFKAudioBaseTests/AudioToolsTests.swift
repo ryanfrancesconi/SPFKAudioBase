@@ -1,13 +1,14 @@
 import AVFoundation
+import Foundation
 import Numerics
-import SPFKBase
 @testable import SPFKAudioBase
+import SPFKBase
 import SPFKTesting
 import Testing
 
 @Suite(.tags(.file))
 final class AudioToolsTests: BinTestCase {
-    @Test func testLoopAudio() async throws {
+    @Test func loopAudio() async throws {
         let url = TestBundleResources.shared.cowbell_wav
         let audioFile1 = try AVAudioFile(forReading: url)
 

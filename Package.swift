@@ -1,13 +1,12 @@
 // swift-tools-version: 6.2.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
-import Foundation
 import PackageDescription
 
 private let name = "SPFKAudioBase" // Swift target
 private let dependencyNames: [String] = ["SPFKBase", "SPFKTesting"]
 private let dependencyBranch = "main"
-private let useLocalDependencies: Bool = false
+private var useLocalDependencies: Bool = false
 private let platforms: [PackageDescription.SupportedPlatform]? = [
     .macOS(.v12),
     .iOS(.v15),
