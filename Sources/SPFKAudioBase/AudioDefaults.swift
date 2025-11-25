@@ -2,7 +2,7 @@ import AVFoundation
 import SPFKBase
 
 public actor AudioDefaults {
-    private static let defaultFormat: AVAudioFormat = .init(
+    static let defaultFormat: AVAudioFormat = .init(
         standardFormatWithSampleRate: 48000,
         channels: 2
     ) ?? AVAudioFormat()

@@ -1,7 +1,7 @@
 
 import AVFoundation
 import Foundation
-import SPFKAudioBase
+@testable import SPFKAudioBase
 import SPFKBase
 import SPFKTesting
 import Testing
@@ -11,23 +11,23 @@ import Testing
 @Suite(.serialized, .tags(.file))
 class AudioDefaultsTests {
     @Test func setters() async throws {
-        #expect(await AudioDefaults2.shared.sampleRate == 48000)
+        #expect(await AudioDefaults.shared.sampleRate == 48000)
 
-        await AudioDefaults2.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 2)!)
-        #expect(await AudioDefaults2.shared.sampleRate == 44100)
+        await AudioDefaults.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 2)!)
+        #expect(await AudioDefaults.shared.sampleRate == 44100)
 
-        await AudioDefaults2.shared.update(enforceMinimumSamplateRate: true)
-        await AudioDefaults2.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: 11025, channels: 2)!)
-        #expect(await AudioDefaults2.shared.sampleRate == 44100)
+        await AudioDefaults.shared.update(enforceMinimumSamplateRate: true)
+        await AudioDefaults.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: 11025, channels: 2)!)
+        #expect(await AudioDefaults.shared.sampleRate == 44100)
 
-        await AudioDefaults2.shared.update(enforceMinimumSamplateRate: false)
-        await AudioDefaults2.shared.update(minimumSampleRateSupported: 11025)
-        await AudioDefaults2.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: 11025, channels: 2)!)
-        #expect(await AudioDefaults2.shared.sampleRate == 11025)
+        await AudioDefaults.shared.update(enforceMinimumSamplateRate: false)
+        await AudioDefaults.shared.update(minimumSampleRateSupported: 11025)
+        await AudioDefaults.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: 11025, channels: 2)!)
+        #expect(await AudioDefaults.shared.sampleRate == 11025)
         
-        await AudioDefaults2.shared.update(enforceMinimumSamplateRate: true)
-        await AudioDefaults2.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: AudioDefaults2.defaultSampleRate, channels: 2)!)
-        #expect(await AudioDefaults2.shared.sampleRate == 48000)
+        await AudioDefaults.shared.update(enforceMinimumSamplateRate: true)
+        await AudioDefaults.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: AudioDefaults.defaultFormat.sampleRate, channels: 2)!)
+        #expect(await AudioDefaults.shared.sampleRate == 48000)
 
     }
     
@@ -36,10 +36,10 @@ class AudioDefaultsTests {
         let task1 = Task {
             for _ in 0 ... 10 {
                 Log.debug("🟡 enter 11k")
-                await AudioDefaults2.shared.update(enforceMinimumSamplateRate: false)
-                await AudioDefaults2.shared.update(minimumSampleRateSupported: 11025)
-                await AudioDefaults2.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: 11025, channels: 2)!)
-                #expect(await AudioDefaults2.shared.sampleRate == 11025)
+                await AudioDefaults.shared.update(enforceMinimumSamplateRate: false)
+                await AudioDefaults.shared.update(minimumSampleRateSupported: 11025)
+                await AudioDefaults.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: 11025, channels: 2)!)
+                #expect(await AudioDefaults.shared.sampleRate == 11025)
                 Log.debug("🟡 set 11k")
 
             }
@@ -48,9 +48,9 @@ class AudioDefaultsTests {
         let task2 = Task {
             for _ in 0 ... 10 {
                 Log.debug("🟠 enter 48k")
-                await AudioDefaults2.shared.update(enforceMinimumSamplateRate: true)
-                await AudioDefaults2.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: AudioDefaults2.defaultSampleRate, channels: 2)!)
-                #expect(await AudioDefaults2.shared.sampleRate == 48000)
+                await AudioDefaults.shared.update(enforceMinimumSamplateRate: true)
+                await AudioDefaults.shared.update(systemFormat: AVAudioFormat(standardFormatWithSampleRate: AudioDefaults.defaultFormat.sampleRate, channels: 2)!)
+                #expect(await AudioDefaults.shared.sampleRate == 48000)
                 Log.debug("🟠 set 48k")
             }
         }
@@ -58,6 +58,6 @@ class AudioDefaultsTests {
         _ = await task1.result
         _ = await task2.result
         
-        Log.debug(await AudioDefaults2.shared.sampleRate)
+        Log.debug(await AudioDefaults.shared.sampleRate)
     }
 }
