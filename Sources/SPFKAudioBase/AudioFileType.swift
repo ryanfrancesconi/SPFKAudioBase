@@ -7,7 +7,7 @@ import Foundation
 // swiftformat:disable consecutiveSpaces
 
 /// Common audio formats used by the SPFK system
-public enum AudioFileType: String, Hashable, Codable, CaseIterable {
+public enum AudioFileType: String, Hashable, Codable, CaseIterable, Sendable {
     case aac
     case aifc
     case aiff
