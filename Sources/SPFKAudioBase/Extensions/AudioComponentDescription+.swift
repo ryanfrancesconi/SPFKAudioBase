@@ -11,7 +11,7 @@ extension AudioComponentDescription {
             componentSubType: 0,
             componentManufacturer: 0,
             componentFlags: 0,
-            componentFlagsMask: 0
+            componentFlagsMask: 0,
         )
     }
 

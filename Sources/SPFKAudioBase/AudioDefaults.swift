@@ -4,7 +4,7 @@ import SPFKBase
 public actor AudioDefaults {
     static let defaultFormat: AVAudioFormat = .init(
         standardFormatWithSampleRate: 48000,
-        channels: 2
+        channels: 2,
     ) ?? AVAudioFormat()
 
     public static let shared = AudioDefaults()

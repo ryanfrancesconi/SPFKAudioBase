@@ -1,7 +1,7 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/SPFKAudio
 
-import Accelerate
 import AVFoundation
+import Accelerate
 import SPFKBase
 
 extension AVAudioPCMBuffer {
@@ -59,7 +59,7 @@ extension AVAudioPCMBuffer {
 
         self.init(
             pcmFormat: audioFile.processingFormat,
-            frameCapacity: AVAudioFrameCount(audioFile.length)
+            frameCapacity: AVAudioFrameCount(audioFile.length),
         )
 
         try audioFile.read(into: self)
@@ -75,7 +75,7 @@ extension AVAudioPCMBuffer {
             forWriting: url,
             settings: settings,
             commonFormat: format.commonFormat,
-            interleaved: format.isInterleaved
+            interleaved: format.isInterleaved,
         )
 
         try output.write(from: self)

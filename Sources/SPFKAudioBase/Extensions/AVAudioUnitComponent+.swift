@@ -27,7 +27,7 @@ extension AVAudioUnitComponent {
         AVAudioUnitComponentManager
             .shared()
             .components(matching: componentDescription)
-            .compactMap { $0 }
+            .compactMap(\.self)
             .first
     }
 }

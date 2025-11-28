@@ -11,8 +11,8 @@ extension AVAudioEngine {
     public func safeAttach(nodes: [AVAudioNode]) {
         let unattached = nodes.filter { $0.engine == nil }
 
-        unattached.forEach {
-            attach($0)
+        for item in unattached {
+            attach(item)
         }
     }
 
@@ -25,7 +25,7 @@ extension AVAudioEngine {
     public func connectAndAttach(
         _ node1: AVAudioNode,
         to node2: AVAudioNode,
-        format: AVAudioFormat
+        format: AVAudioFormat,
     ) {
         safeAttach(nodes: [node1, node2])
 
@@ -81,7 +81,9 @@ extension AVAudioEngine {
     /// node to the mixer prior to making a connection.
     ///
     /// This is still a bug as of macOS 14.6 (2024).
-    @discardableResult private func initialize(mixer: AVAudioMixerNode, format: AVAudioFormat) -> MixerInitializationNode? {
+    @discardableResult private func initialize(mixer: AVAudioMixerNode, format: AVAudioFormat)
+        -> MixerInitializationNode?
+    {
         let dummy = MixerInitializationNode()
 
         safeAttach(nodes: [dummy])
@@ -94,7 +96,7 @@ extension AVAudioEngine {
 }
 
 /// A typed node so we can detect and manage if it leaks
-internal class MixerInitializationNode: AVAudioUnitSampler {
+class MixerInitializationNode: AVAudioUnitSampler {
     deinit {
         Log.debug("* { MixerInitializationNode }")
     }

@@ -20,7 +20,7 @@ private let githubBase = "https://github.com/ryanfrancesconi"
 private let products: [PackageDescription.Product] = [
     .library(
         name: name,
-        targets: [name]
+        targets: [name],
     ),
 ]
 
@@ -49,7 +49,7 @@ private var swiftTargetDependencies: [PackageDescription.Target.Dependency] {
 private let swiftTarget: PackageDescription.Target = .target(
     name: name,
     dependencies: swiftTargetDependencies,
-    resources: nil
+    resources: nil,
 )
 
 private var testTargetDependencies: [PackageDescription.Target.Dependency] {
@@ -67,7 +67,7 @@ private var testTargetDependencies: [PackageDescription.Target.Dependency] {
 private let testTarget: PackageDescription.Target = .testTarget(
     name: nameTests,
     dependencies: testTargetDependencies,
-    resources: nil
+    resources: nil,
 )
 
 private let targets: [PackageDescription.Target] = [
@@ -81,5 +81,5 @@ let package = Package(
     products: products,
     dependencies: packageDependencies,
     targets: targets,
-    cxxLanguageStandard: .cxx20
+    cxxLanguageStandard: .cxx20,
 )

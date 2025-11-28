@@ -12,7 +12,8 @@ extension AVAudioFile {
     /// Estimated data rate in kbps
     public var dataRate: Double? {
         guard duration > 0,
-              let fileSize = url.fileSize else { return nil }
+            let fileSize = url.fileSize
+        else { return nil }
 
         let fileSizeInBits = fileSize * 8 // Convert bytes to bits
         return Double(fileSizeInBits) / duration / 1000
@@ -27,10 +28,12 @@ extension AVAudioFile {
 
     /// converts to a 32 bit PCM buffer
     public func toAVAudioPCMBuffer() throws -> AVAudioPCMBuffer {
-        guard let buffer = AVAudioPCMBuffer(
-            pcmFormat: processingFormat,
-            frameCapacity: AVAudioFrameCount(length)
-        ) else {
+        guard
+            let buffer = AVAudioPCMBuffer(
+                pcmFormat: processingFormat,
+                frameCapacity: AVAudioFrameCount(length),
+            )
+        else {
             throw NSError(description: "Error reading into input buffer")
         }
 
@@ -48,10 +51,12 @@ extension AVAudioFile {
 
         let frameCapacity = AVAudioFrameCount(seconds * fileFormat.sampleRate)
 
-        guard let buffer = AVAudioPCMBuffer(
-            pcmFormat: processingFormat,
-            frameCapacity: frameCapacity
-        ) else {
+        guard
+            let buffer = AVAudioPCMBuffer(
+                pcmFormat: processingFormat,
+                frameCapacity: frameCapacity,
+            )
+        else {
             throw NSError(description: "Failed creating buffer")
         }
 

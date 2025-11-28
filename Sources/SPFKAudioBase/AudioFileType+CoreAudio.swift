@@ -22,7 +22,7 @@ extension AudioFileType {
             inSpecifierSize,
             &inSpecifier,
             &ioDataSize,
-            outPropertyData
+            outPropertyData,
         )
 
         guard err == noErr else {
@@ -61,7 +61,7 @@ extension AudioFileType {
             inSpecifierSize,
             &inSpecifier,
             &ioDataSize,
-            outPropertyData
+            outPropertyData,
         ) else {
             throw NSError(description: "kAudioFileGlobalInfo_FileTypeName failed for id \(inSpecifier.fourCC)")
         }
@@ -90,7 +90,7 @@ extension AudioFileType {
             inAudioFile,
             kAudioFilePropertyFileFormat,
             &ioDataSize,
-            &isWritable
+            &isWritable,
         ) else {
             closeFile()
             throw NSError(description: "kAudioFilePropertyFileFormat failed to determine data size for \(url.lastPathComponent)")
@@ -108,7 +108,7 @@ extension AudioFileType {
             inAudioFile,
             kAudioFilePropertyFileFormat,
             &ioDataSize,
-            format
+            format,
         ) else {
             throw NSError(description: "kAudioFilePropertyFileFormat failed for \(url.lastPathComponent)")
         }
@@ -125,7 +125,7 @@ extension AudioFileType {
             url as CFURL,
             .readPermission,
             0,
-            &audioFileID
+            &audioFileID,
         )
 
         return audioFileID

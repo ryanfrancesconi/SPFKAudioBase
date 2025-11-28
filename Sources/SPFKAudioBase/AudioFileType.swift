@@ -52,22 +52,22 @@ public enum AudioFileType: String, Hashable, Codable, CaseIterable, Sendable {
     /// See getFileTypeName() for lookup version
     public var fileTypeName: String? {
         switch self {
-        case .aac:  return "AAC"
-        case .aiff: return "AIFF"
-        case .caf:  return "CAF"
-        case .flac: return "FLAC"
-        case .m4a:  return "Apple MPEG-4 Audio"
-        case .m4b:  return "Apple MPEG-4 AudioBooks"
-        case .mp3:  return "MPEG Layer 3"
-        case .mp4:  return "MPEG-4"
-        case .m4v:  return "Apple MPEG-4 Video"
-        case .mov:  return "Apple QuickTime"
-        case .ogg:  return "Ogg Vorbis"
-        case .opus: return "Ogg Opus"
-        case .wav:  return "Waveform Audio"
-        case .w64:  return "Wave (BW64 for length over 4 GB)"
+        case .aac:  "AAC"
+        case .aiff: "AIFF"
+        case .caf:  "CAF"
+        case .flac: "FLAC"
+        case .m4a:  "Apple MPEG-4 Audio"
+        case .m4b:  "Apple MPEG-4 AudioBooks"
+        case .mp3:  "MPEG Layer 3"
+        case .mp4:  "MPEG-4"
+        case .m4v:  "Apple MPEG-4 Video"
+        case .mov:  "Apple QuickTime"
+        case .ogg:  "Ogg Vorbis"
+        case .opus: "Ogg Opus"
+        case .wav:  "Waveform Audio"
+        case .w64:  "Wave (BW64 for length over 4 GB)"
         default:
-            return nil
+            nil
         }
     }
 
@@ -99,19 +99,18 @@ public enum AudioFileType: String, Hashable, Codable, CaseIterable, Sendable {
     /// AVFoundation: File format UTIs
     public var avFileType: AVFileType? {
         switch self {
-        case .aac:  return .mp4
-        case .aiff: return .aiff
-        case .aifc: return .aifc
-        case .au:   return .au
-        case .caf:  return .caf
-        case .m4a:  return .m4a
-        case .mov:  return .mov
-        case .mp3:  return .mp3
-        case .mp4:  return .mp4
-        case .wav:  return .wav
-
+        case .aac:  .mp4
+        case .aiff: .aiff
+        case .aifc: .aifc
+        case .au:   .au
+        case .caf:  .caf
+        case .m4a:  .m4a
+        case .mov:  .mov
+        case .mp3:  .mp3
+        case .mp4:  .mp4
+        case .wav:  .wav
         default:
-            return nil
+            nil
         }
     }
 
@@ -135,17 +134,16 @@ public enum AudioFileType: String, Hashable, Codable, CaseIterable, Sendable {
 
     public var mimeType: String? {
         switch self {
-        case .aac:  return "audio/aac"
-        case .aiff: return "audio/aiff"
-        case .caf:  return "audio/x-caf"
-        case .m4a:  return "audio/x-m4a"
-        case .mov:  return "video/mov"
-        case .mp3:  return "audio/mpeg"
-        case .mp4:  return "video/mp4"
-        case .wav:  return "audio/wav"
-
+        case .aac:  "audio/aac"
+        case .aiff: "audio/aiff"
+        case .caf:  "audio/x-caf"
+        case .m4a:  "audio/x-m4a"
+        case .mov:  "video/mov"
+        case .mp3:  "audio/mpeg"
+        case .mp4:  "video/mp4"
+        case .wav:  "audio/wav"
         default:
-            return utType?.preferredMIMEType
+            utType?.preferredMIMEType
         }
     }
 
@@ -153,33 +151,33 @@ public enum AudioFileType: String, Hashable, Codable, CaseIterable, Sendable {
     public var audioFormatID: AudioFormatID? {
         switch self {
         case .wav, .aiff, .caf:
-            return kAudioFormatLinearPCM
+            kAudioFormatLinearPCM
         case .m4a, .mp4:
-            return kAudioFormatMPEG4AAC
+            kAudioFormatMPEG4AAC
         case .mp3:
-            return kAudioFormatMPEGLayer3
+            kAudioFormatMPEGLayer3
         case .aac:
-            return kAudioFormatMPEG4AAC
+            kAudioFormatMPEG4AAC
         default:
-            return nil
+            nil
         }
     }
 
     /// CoreAudio: Hardcoded CoreAudio identifier for an AudioFileType.
     public var audioFileTypeID: AudioFileTypeID? {
         switch self {
-        case .aac:  return kAudioFileAAC_ADTSType
-        case .aifc: return kAudioFileAIFCType
-        case .aiff: return kAudioFileAIFFType
-        case .caf:  return kAudioFileCAFType
-        case .flac: return kAudioFileFLACType
-        case .m4a:  return kAudioFileM4AType
-        case .mp3:  return kAudioFileMP3Type
-        case .mp4:  return kAudioFileMPEG4Type
-        case .w64:  return kAudioFileWave64Type
-        case .wav:  return kAudioFileWAVEType
+        case .aac:  kAudioFileAAC_ADTSType
+        case .aifc: kAudioFileAIFCType
+        case .aiff: kAudioFileAIFFType
+        case .caf:  kAudioFileCAFType
+        case .flac: kAudioFileFLACType
+        case .m4a:  kAudioFileM4AType
+        case .mp3:  kAudioFileMP3Type
+        case .mp4:  kAudioFileMPEG4Type
+        case .w64:  kAudioFileWave64Type
+        case .wav:  kAudioFileWAVEType
         default:
-            return nil
+            nil
         }
     }
 }

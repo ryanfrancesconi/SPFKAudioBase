@@ -8,7 +8,7 @@ extension AVAudioNode: @retroactive TypeDescribable {
     private func error(function: String, string: String) -> NSError {
         Log.printCallStack()
 
-        return NSError(description: "\(self.typeName).\(function) Error: \(string)")
+        return NSError(description: "\(typeName).\(function) Error: \(string)")
     }
 
     public var ioConnectionDescription: String {
@@ -103,9 +103,9 @@ extension AVAudioNode {
         for (node, connections) in newConnections {
             if connections.isEmpty {
                 engine.disconnectNodeOutput(node)
-                
+
             } else {
-                engine.connect(node, to: connections, fromBus: 0, format: await AudioDefaults.shared.systemFormat)
+                await engine.connect(node, to: connections, fromBus: 0, format: AudioDefaults.shared.systemFormat)
             }
         }
     }

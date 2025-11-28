@@ -6,15 +6,15 @@ extension AVAudioFormat {
     public var commonFormatReadableDescription: String? {
         switch commonFormat {
         case .pcmFormatInt16:
-            return "Signed 16-bit native-endian integer"
+            "Signed 16-bit native-endian integer"
         case .pcmFormatInt32:
-            return "Signed 32-bit native-endian integer"
+            "Signed 32-bit native-endian integer"
         case .pcmFormatFloat32:
-            return "Native-endian 32 bit floating point"
+            "Native-endian 32 bit floating point"
         case .pcmFormatFloat64:
-            return "Native-endian 64 bit floating point"
+            "Native-endian 64 bit floating point"
         default:
-            return nil
+            nil
         }
     }
 
@@ -31,7 +31,7 @@ extension AVAudioFormat {
     public var readableDescription: String {
         var out = "\(sampleRate) Hz, " + channelCountReadableDescription
 
-        if let commonFormatReadableDescription = commonFormatReadableDescription {
+        if let commonFormatReadableDescription {
             out += ", \(commonFormatReadableDescription)"
         }
 
@@ -44,15 +44,13 @@ extension AVAudioFormat {
 
     public var bitRate: Double {
         let desc = streamDescription.pointee
-        return desc.mSampleRate *
-            Double(desc.mBitsPerChannel) *
-        Double(desc.mChannelsPerFrame)
+        return desc.mSampleRate * Double(desc.mBitsPerChannel) * Double(desc.mChannelsPerFrame)
     }
 
     public static func createPCMFormat(
         bitsPerChannel: UInt32,
         channels: UInt32,
-        sampleRate: Double
+        sampleRate: Double,
     ) -> AVAudioFormat? {
         let outputBytesPerFrame = bitsPerChannel * channels / 8
         let outputBytesPerPacket = outputBytesPerFrame
@@ -67,7 +65,7 @@ extension AVAudioFormat {
             mBytesPerFrame: outputBytesPerFrame,
             mChannelsPerFrame: channels,
             mBitsPerChannel: bitsPerChannel,
-            mReserved: 0
+            mReserved: 0,
         )
 
         return AVAudioFormat(streamDescription: &outDesc)
