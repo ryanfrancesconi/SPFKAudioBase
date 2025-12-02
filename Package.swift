@@ -5,8 +5,8 @@ import PackageDescription
 
 let name = "SPFKAudioBase" // Swift target
 let dependencyNames: [String] = ["SPFKBase", "SPFKTesting"]
-let spfkDependencyBranch: String = "development"
 let remoteDependencies: [RemoteDependency] = []
+let resources: [PackageDescription.Resource]? = nil
 
 let nameC: String? = nil
 let dependencyNamesC: [String] = []
@@ -18,6 +18,8 @@ let platforms: [PackageDescription.SupportedPlatform]? = [
 ]
 
 // MARK: - Reusable Code for a dual Swift + C package ---------------------------------------------------
+
+let spfkVersion: Version = .init(0, 0, 1)
 
 struct RemoteDependency {
     let package: PackageDescription.Package.Dependency
@@ -36,13 +38,15 @@ var swiftTarget: PackageDescription.Target {
             value.append(.target(name: nameC))
         }
 
+        value.append(contentsOf: remoteDependencies.map(\.product))
+
         return value
     }
 
     return .target(
         name: name,
         dependencies: targetDependencies,
-        resources: nil
+        resources: resources
     )
 }
 
@@ -89,7 +93,7 @@ var cTarget: PackageDescription.Target? {
         return value
     }
 
-    // all spfk c targets have the same folder structure currently
+    // all spfk C targets have the same folder structure currently
     return .target(
         name: nameC,
         dependencies: targetDependencies,
@@ -111,10 +115,12 @@ var packageDependencies: [PackageDescription.Package.Dependency] {
     var spfkDependencies: [RemoteDependency] {
         let githubBase = "https://github.com/ryanfrancesconi"
 
+        // .when(configuration: .debug)
+
         return dependencyNames.map {
             RemoteDependency(
-                package: .package(url: "\(githubBase)/\($0)", branch: spfkDependencyBranch),
-                product: .product(name: "$0", package: "$0")
+                package: .package(url: "\(githubBase)/\($0)", from: spfkVersion),
+                product: .product(name: "\($0)", package: "\($0)")
             )
         }
     }
