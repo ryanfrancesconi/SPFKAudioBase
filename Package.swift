@@ -5,9 +5,9 @@ import PackageDescription
 
 let name = "SPFKAudioBase" // Swift target
 var localDependencies: [RemoteDependency] { [
-    .init(package: .package(url: "\(githubBase)/SPFKBase", from: "0.0.1"),
+    .init(package: .package(url: "\(githubBase)/spfk-base", from: "0.0.1"),
           product: .product(name: "SPFKBase", package: "spfk-base")),
-    .init(package: .package(url: "\(githubBase)/SPFKTesting", from: "0.0.1"),
+    .init(package: .package(url: "\(githubBase)/spfk-testing", from: "0.0.1"),
           product: .product(name: "SPFKTesting", package: "spfk-testing")),
 ] }
 let remoteDependencies: [RemoteDependency] = []
