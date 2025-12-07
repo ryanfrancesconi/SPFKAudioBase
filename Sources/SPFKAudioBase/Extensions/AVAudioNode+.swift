@@ -1,4 +1,4 @@
-// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/SPFKAudio
+// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-audio
 
 import AVFoundation
 import SPFKBase
@@ -9,6 +9,12 @@ extension AVAudioNode: @retroactive TypeDescribable {
         Log.printCallStack()
 
         return NSError(description: "\(typeName).\(function) Error: \(string)")
+    }
+
+    public var resolvedName: String {
+        auAudioUnit.audioUnitName ??
+            auAudioUnit.audioUnitShortName ??
+            description
     }
 
     public var ioConnectionDescription: String {
