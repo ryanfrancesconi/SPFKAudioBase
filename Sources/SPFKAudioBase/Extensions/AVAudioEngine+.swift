@@ -8,6 +8,10 @@ extension AVAudioEngine {
         outputNode.outputFormat(forBus: 0)
     }
 
+    public var maxFramesPerSlice: AVAudioFrameCount {
+        outputNode.auAudioUnit.maximumFramesToRender
+    }
+
     public func safeAttach(nodes: [AVAudioNode]) {
         let unattached = nodes.filter { $0.engine == nil }
 
@@ -98,6 +102,6 @@ extension AVAudioEngine {
 /// A typed node so we can detect and manage if it leaks
 class MixerInitializationNode: AVAudioUnitSampler {
     deinit {
-        Log.debug("* { MixerInitializationNode }")
+        Log.debug("- { \(self) }")
     }
 }
