@@ -9,7 +9,10 @@ extension AVAudioMixerNode {
     }
 
     public var inputs: [AVAudioConnectionPoint] {
-        guard let engine else { return [] }
+        guard let engine else {
+            assertionFailure("engine is nil")
+            return []
+        }
 
         var out = [AVAudioConnectionPoint]()
 
@@ -23,7 +26,10 @@ extension AVAudioMixerNode {
     }
 
     public var outputs: [AVAudioConnectionPoint] {
-        guard let engine else { return [] }
+        guard let engine else {
+            assertionFailure("engine is nil")
+            return []
+        }
 
         return engine.outputConnectionPoints(for: self, outputBus: 0)
     }
