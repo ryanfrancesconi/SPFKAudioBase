@@ -10,7 +10,6 @@ extension AVAudioMixerNode {
 
     public var inputs: [AVAudioConnectionPoint] {
         guard let engine else {
-            assertionFailure("engine is nil")
             return []
         }
 
@@ -27,7 +26,6 @@ extension AVAudioMixerNode {
 
     public var outputs: [AVAudioConnectionPoint] {
         guard let engine else {
-            assertionFailure("engine is nil")
             return []
         }
 
