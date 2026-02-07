@@ -7,6 +7,14 @@ public struct Bpm: Equatable, Sendable, Comparable, Hashable {
 
     public let rawValue: Double
 
+    public var stringValue: String {
+        if isWholeNumber {
+            return "\(Int(rawValue))"
+        }
+
+        return "\(rawValue)"
+    }
+
     public let multiples: [Double]
 
     public var isWholeNumber: Bool {
@@ -34,15 +42,5 @@ public struct Bpm: Equatable, Sendable, Comparable, Hashable {
     /// x8 to /8 values, E.g., 80 Bpm == 160 Bpm/
     public func isMultiple(of rhs: Bpm) -> Bool {
         multiples.contains(rhs.rawValue)
-    }
-}
-
-extension Bpm: CustomStringConvertible {
-    public var description: String {
-        if isWholeNumber {
-            return "\(Int(rawValue)) bpm"
-        }
-
-        return "\(rawValue) bpm"
     }
 }
