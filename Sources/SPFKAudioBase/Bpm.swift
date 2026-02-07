@@ -1,4 +1,5 @@
 import Foundation
+import SPFKBase
 
 public struct Bpm: Equatable, Sendable, Comparable, Hashable {
     public static func < (lhs: Bpm, rhs: Bpm) -> Bool {
@@ -42,5 +43,18 @@ public struct Bpm: Equatable, Sendable, Comparable, Hashable {
     /// x8 to /8 values, E.g., 80 Bpm == 160 Bpm/
     public func isMultiple(of rhs: Bpm) -> Bool {
         multiples.contains(rhs.rawValue)
+    }
+}
+
+extension Bpm: CustomStringConvertible {
+    public var description: String {
+        "Bpm(\(stringValue))"
+    }
+}
+
+extension [Bpm] {
+    public var average: Bpm? {
+        let value = map(\.rawValue).averaged.rounded(.toNearestOrEven)
+        return try? Bpm(value)
     }
 }
