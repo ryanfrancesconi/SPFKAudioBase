@@ -1,8 +1,11 @@
 import Foundation
 import SPFKBase
 
-public struct Bpm: Equatable, Sendable, Comparable, Hashable {
+public struct Bpm: Equatable, Sendable, Comparable, Hashable, Codable {
+    public static let tempoRange: ClosedRange<Bpm> = Bpm(1)! ... Bpm(1024)!
+
     public static let _60bpm = Bpm(60)!
+    public static let _120bpm = Bpm(120)!
 
     public static func < (lhs: Bpm, rhs: Bpm) -> Bool {
         lhs.rawValue < rhs.rawValue
@@ -16,6 +19,10 @@ public struct Bpm: Equatable, Sendable, Comparable, Hashable {
         }
 
         return "\(rawValue)"
+    }
+
+    public var quarterNoteDuration: TimeInterval {
+        60.0 / rawValue
     }
 
     public let multiples: [Double]
