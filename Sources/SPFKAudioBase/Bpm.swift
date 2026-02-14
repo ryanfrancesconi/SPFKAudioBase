@@ -33,7 +33,7 @@ public struct Bpm: Equatable, Sendable, Comparable, Hashable, Codable {
 
     public init?(_ rawValue: Double) {
         guard rawValue > 0 else {
-            assertionFailure("Bpm must be a positive value > 0")
+            Log.error("Bpm must be a positive value > 0")
             return nil
         }
 
