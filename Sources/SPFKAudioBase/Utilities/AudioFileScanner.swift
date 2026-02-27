@@ -30,7 +30,7 @@ public struct AudioFileScanner: Sendable {
     }
 
     public func process(audioFile: AVAudioFile) async throws {
-        Log.debug(audioFile.url.lastPathComponent, audioFile.duration, "seconds")
+        Log.debug(audioFile.url.lastPathComponent, audioFile.duration, "seconds", "bufferDuration", bufferDuration)
 
         // store the current frame before scanning the file
         let currentFrame = audioFile.framePosition
@@ -91,14 +91,11 @@ public struct AudioFileScanner: Sendable {
             audioFile.framePosition = currentFrame
 
             let progress: UnitInterval = Double(currentFrame) / totalFramesDouble
-
             await send(progress: progress)
 
             try audioFile.read(into: buffer, frameCount: framesPerBuffer)
 
             if let rawData = buffer.floatChannelData {
-                // let samples: UnsafeMutablePointer<Float> = rawData.pointee
-
                 await send(samples: rawData)
             }
 
