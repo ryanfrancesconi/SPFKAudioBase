@@ -10,7 +10,6 @@ public struct CountableResult<T: Hashable & Sendable>: ExpressibleByArrayLiteral
         results = elements
     }
 
-    // Standard init for empty creation
     public init(elements: [T] = []) {
         results = elements
     }
