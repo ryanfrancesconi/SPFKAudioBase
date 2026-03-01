@@ -45,15 +45,18 @@ public struct Bpm: Equatable, Sendable, Comparable, Hashable, Codable {
     }
 
     /// x8 to /8 values, E.g., 80 Bpm == 160 Bpm/
-    public func isMultiple(of rhs: Double) -> Bool {
+    public func isMultiple(of rhs: Double, tolerance: Double = 0) -> Bool {
         guard let testValue = Bpm(rhs) else { return false }
 
-        return isMultiple(of: testValue)
+        return isMultiple(of: testValue, tolerance: tolerance)
     }
 
     /// x8 to /8 values, E.g., 80 Bpm == 160 Bpm/
-    public func isMultiple(of rhs: Bpm) -> Bool {
-        multiples.contains(rhs.rawValue)
+    public func isMultiple(of rhs: Bpm, tolerance: Double = 0) -> Bool {
+        if tolerance <= 0 {
+            return multiples.contains(rhs.rawValue)
+        }
+        return multiples.contains { abs($0 - rhs.rawValue) <= tolerance }
     }
 }
 
