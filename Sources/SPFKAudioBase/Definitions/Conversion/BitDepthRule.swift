@@ -1,3 +1,5 @@
+// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-audio-base
+
 import Foundation
 
 /// Controls whether the converter may increase the bit depth beyond the source.
