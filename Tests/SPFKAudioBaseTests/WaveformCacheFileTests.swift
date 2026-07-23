@@ -6,7 +6,7 @@ import SPFKBase
 import SPFKTesting
 import Testing
 
-@Suite(.serialized, .tags(.file))
+@Suite(.tags(.file))
 final class WaveformCacheFileTests: BinTestCase {
     @Test func cacheFileDirectRoundTrip() throws {
         let floats: FloatChannelData = [

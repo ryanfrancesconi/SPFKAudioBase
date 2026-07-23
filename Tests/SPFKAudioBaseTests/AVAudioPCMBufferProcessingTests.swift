@@ -6,7 +6,7 @@ import SPFKAudioBase
 import SPFKBase
 import Testing
 
-@Suite(.serialized)
+@Suite
 class AVAudioPCMBufferProcessingTests {
     // MARK: - Helpers
 

@@ -7,7 +7,7 @@ import Testing
 
 // Note, more tests in SPFKMetadataTests
 
-@Suite(.serialized, .tags(.file))
+@Suite(.tags(.file))
 class AudioFileTypeTests: BinTestCase {
     @Test func getFileTypeName() throws {
         let ids = [
