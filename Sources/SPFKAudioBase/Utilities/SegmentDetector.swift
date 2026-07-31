@@ -2,6 +2,7 @@
 
 import AVFoundation
 import Foundation
+import SPFKBase
 
 /// Detects non-silent regions in an audio file and returns them as a time-ordered
 /// array of ``TrimDescription`` values.

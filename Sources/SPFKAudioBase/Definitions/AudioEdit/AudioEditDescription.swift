@@ -1,6 +1,7 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-audio-base
 
 import Foundation
+import SPFKBase
 
 /// Describes a set of pending non-destructive audio edits for a file.
 /// A nil instance means no edits are queued. An instance with all default
