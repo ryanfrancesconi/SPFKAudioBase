@@ -27,12 +27,19 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
     case wav
     case w64
 
-    /// File types that are commonly used for metadata storage
+    /// File types that are commonly used for metadata storage.
+    ///
+    /// `mov`/`m4v` belong here for the same reason `mp4` does — TagLib's MP4 handler reads and
+    /// writes them, including a QuickTime chapter track for markers. Their earlier absence made
+    /// `AudioFormatConverter.copyMetadata()` skip a `.mov` output wholesale, dropping tags,
+    /// markers, artwork and Finder tags in one step.
     public static let metadataTypes: [AudioFileType] = [
         .aac,
         .aiff,
         .m4a,
         .m4b,
+        .m4v,
+        .mov,
         .mp3,
         .mp4,
         .wav,
