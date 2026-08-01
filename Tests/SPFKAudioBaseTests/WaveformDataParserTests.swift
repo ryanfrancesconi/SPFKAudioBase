@@ -65,17 +65,19 @@ class WaveformDataParserTests: BinTestCase {
     @Test func cancelTask() async throws {
         let input = TestBundleResources.shared.tabla_6_channel
 
+        // Cancel from the parser's own progress callback rather than from a timer:
+        // the handler is awaited inside the chunk loop, so the first progress event
+        // puts cancellation mid-parse with no dependence on scheduling or wall clock.
         let task = Task<WaveformData, Error>(priority: .high) {
             let parser = WaveformDataParser(resolution: .veryHigh, eventHandler: { event in
                 Log.debug(event.progress)
+
+                guard case .progress = event else { return }
+
+                withUnsafeCurrentTask { $0?.cancel() }
             })
 
             return try await parser.parse(url: input)
-        }
-
-        Task { @MainActor in
-            try await Task.sleep(seconds: 0.009)
-            task.cancel()
         }
 
         let result = await task.result
