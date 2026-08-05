@@ -18,6 +18,7 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
     case m4a
     case m4b
     case m4v
+    case mkv
     case mov
     case mp3
     case mp4
@@ -26,6 +27,7 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
     case ts
     case wav
     case w64
+    case webm
 
     /// File types that are commonly used for metadata storage.
     ///
@@ -33,16 +35,22 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
     /// writes them, including a QuickTime chapter track for markers. Their earlier absence made
     /// `AudioFormatConverter.copyMetadata()` skip a `.mov` output wholesale, dropping tags,
     /// markers, artwork and Finder tags in one step.
+    ///
+    /// `mkv`/`webm` likewise: TagLib 2.x ships a full Matroska implementation and `FileRef`
+    /// dispatches both by extension, so reads and writes work without a format-specific path.
+    /// AVFoundation cannot open either — that limits playback and thumbnails, not metadata.
     public static let metadataTypes: [AudioFileType] = [
         .aac,
         .aiff,
         .m4a,
         .m4b,
         .m4v,
+        .mkv,
         .mov,
         .mp3,
         .mp4,
         .wav,
+        .webm,
         .flac,
         .ogg,
         .opus,
@@ -89,7 +97,9 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
         case .mp3:  "MPEG Layer 3"
         case .mp4:  "MPEG-4"
         case .m4v:  "Apple MPEG-4 Video"
+        case .mkv:  "Matroska Video"
         case .mov:  "Apple QuickTime"
+        case .webm: "WebM Video"
         case .ogg:  "Ogg Vorbis"
         case .opus: "Ogg Opus"
         case .wav:  "Waveform Audio"
