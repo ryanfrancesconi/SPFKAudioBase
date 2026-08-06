@@ -105,23 +105,17 @@ extension WaveformDataParser {
                 continue
             }
 
-            guard let rawData = buffer.floatChannelData else {
+            guard buffer.floatChannelData != nil else {
                 throw NSError(description: "Failed to read from buffer")
             }
 
-            let frameCount = framesPerBuffer.int
-
-            for n in 0 ..< channelCount {
-                let bufferPointer = UnsafeBufferPointer(start: rawData[n], count: frameCount)
-
-                let min: Float = vDSP.minimum(bufferPointer)
-                let max: Float = vDSP.maximum(bufferPointer)
-                let value = Float.maximumMagnitude(min, max)
-
-                if !value.isNaN {
-                    outfloatChannelData[n][i] = value
-                }
-            }
+            Self.writePeaks(
+                from: buffer,
+                frameCount: framesPerBuffer.int,
+                channelCount: channelCount,
+                into: &outfloatChannelData,
+                at: i
+            )
 
             currentFrame += AVAudioFramePosition(framesPerBuffer)
 
