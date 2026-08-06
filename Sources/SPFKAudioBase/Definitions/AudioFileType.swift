@@ -60,6 +60,18 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
         Self.metadataTypes.contains(self)
     }
 
+    /// Matroska-family containers. WebM is a Matroska profile, so one parser covers both and
+    /// nothing downstream needs to tell them apart.
+    ///
+    /// **AVFoundation cannot open either** — they are absent from `AVURLAsset.audiovisualTypes()`,
+    /// and `AVAudioFile(forReading:)` throws `'fmt?'`. So any AV-backed read returns nothing for
+    /// them and a caller has to route to the demuxer instead, which is what this answers.
+    public static let matroskaTypes: [AudioFileType] = [.mkv, .webm]
+
+    public var isMatroska: Bool {
+        Self.matroskaTypes.contains(self)
+    }
+
     /// File types with reliable XMP support via the Adobe XMP SDK smart handler.
     /// Formats not listed here either lack a smart handler or have no standard XMP embedding.
     public static let xmpTypes: [AudioFileType] = [
