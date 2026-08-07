@@ -54,6 +54,24 @@ type?.isPCM              // false
 type?.supportsMetadata   // true
 ```
 
+Capability is answered per question rather than by one "supported" flag, because the answers
+genuinely differ by format — `supportsMetadata`, `supportsXMP`, `supportsBEXT`, `supportsIXML`,
+`isAVAudioFileWritable`, `isMatroska`.
+
+```swift
+let mkv = AudioFileType(pathExtension: "mkv")
+mkv?.isMatroska          // true
+mkv?.supportsMetadata    // true  — TagLib 2.x has a full Matroska implementation
+mkv?.avFileType          // nil   — AVFoundation cannot open it at all
+```
+
+**`isMatroska` covers `.mka`, `.mkv` and `.webm`** (WebM is a Matroska profile, so one parser
+serves all three). These are the formats absent from `AVURLAsset.audiovisualTypes()`, where
+`AVAudioFile(forReading:)` throws `'fmt?'` — so any AV-backed read returns nothing and a caller
+has to route to the demuxer in
+[spfk-matroska](https://github.com/ryanfrancesconi/spfk-matroska) instead. Metadata is unaffected
+by that limit, which is why they are in `metadataTypes` while having no `avFileType`.
+
 ### CountableResult
 
 Generic consensus voting for iterative analysis with early exit.
