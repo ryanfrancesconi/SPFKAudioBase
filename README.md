@@ -252,39 +252,6 @@ RealTimeDomain.seconds(string: "1:30.250")
 // 90.25
 ```
 
-## Architecture
-
-```
-SPFKAudioBase
-  ├── Definitions/
-  │   ├── AudioFileType          — Audio format enum with Core Audio/UTType/MIME mappings
-  │   ├── Bpm                    — Tempo value with octave-equivalent matching
-  │   ├── LoudnessDescription    — EBU R128 loudness metrics (LUFS, LU, dBTP)
-  │   ├── NoteName               — Chromatic note names with enharmonic support
-  │   ├── MusicalTonality        — Major / Minor / Unknown
-  │   ├── CountableResult        — Generic consensus voting for iterative analysis
-  │   ├── URLProgressEvent       — Progress/completion events for async processing
-  │   ├── WaveformData           — Drawing-ready waveform sample data
-  │   ├── WaveformDisplay        — Waveform display modes and quality levels
-  │   ├── WaveformDrawingResolution — Resolution presets for waveform rendering
-  │   ├── BufferPeak             — Peak amplitude with sample position
-  │   ├── RealTimeDomain         — Time display formatting
-  │   └── AudioDefaults          — Thread-safe system audio configuration
-  │
-  ├── Extensions/
-  │   ├── AVAudioPCMBuffer+      — Duration, RMS, peak, normalize, fade, convert, loop
-  │   ├── AVAudioFile+           — Duration, bitrate, buffer conversion
-  │   ├── AVAudioFormat+         — Readable descriptions, bit depth, PCM format creation
-  │   ├── AVAudioEngine+         — Safe attach/detach, connection helpers
-  │   ├── AVAudioNode+           — Connection introspection and management
-  │   └── AVAudioMixerNode+      — Input bus management
-  │
-  └── Utilities/
-      ├── AudioFileScanner       — Streaming file scanner with in-memory looping
-      ├── WaveformDataParser     — Multi-resolution waveform data extraction
-      └── AudioTools             — Audio file utilities (looped audio creation)
-```
-
 ## Dependencies
 
 | Package | Purpose |
