@@ -18,6 +18,7 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
     case m4a
     case m4b
     case m4v
+    case mka
     case mkv
     case mov
     case mp3
@@ -45,6 +46,7 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
         .m4a,
         .m4b,
         .m4v,
+        .mka,
         .mkv,
         .mov,
         .mp3,
@@ -66,7 +68,7 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
     /// **AVFoundation cannot open either** — they are absent from `AVURLAsset.audiovisualTypes()`,
     /// and `AVAudioFile(forReading:)` throws `'fmt?'`. So any AV-backed read returns nothing for
     /// them and a caller has to route to the demuxer instead, which is what this answers.
-    public static let matroskaTypes: [AudioFileType] = [.mkv, .webm]
+    public static let matroskaTypes: [AudioFileType] = [.mka, .mkv, .webm]
 
     public var isMatroska: Bool {
         Self.matroskaTypes.contains(self)
@@ -109,6 +111,7 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
         case .mp3:  "MPEG Layer 3"
         case .mp4:  "MPEG-4"
         case .m4v:  "Apple MPEG-4 Video"
+        case .mka:  "Matroska Audio"
         case .mkv:  "Matroska Video"
         case .mov:  "Apple QuickTime"
         case .webm: "WebM Video"
