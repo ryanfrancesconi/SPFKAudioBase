@@ -5,11 +5,16 @@ import SPFKBase
 
 /// Binary file format wrapper for waveform cache entries (`.wfcache`).
 ///
-/// Layout: `[header: 56 bytes][url: variable UTF-8][float data]`
+/// Layout: `[header: 64 bytes][url: variable UTF-8][float data]`
 ///
 /// The fixed header contains all metadata needed for freshness checks and
 /// `WaveformData` reconstruction. Freshness fields (`modificationDate`,
 /// `fileSize`) are at fixed offsets 8–23 for fast partial reads.
+///
+/// **Only the current version is readable.** An entry written by an older build is a cache miss
+/// rather than a migration — this is a derived cache whose worst case is one re-scan, so carrying a
+/// second parser for every past layout costs more than it saves. `WaveformDataStore` deletes what it
+/// cannot read.
 public struct WaveformCacheFile {
     /// File extension for the unified cache format.
     public static let fileExtension = "wfcache"
@@ -17,11 +22,14 @@ public struct WaveformCacheFile {
     /// Magic bytes identifying this file format: "WFDC".
     public static let magic: [UInt8] = [0x57, 0x46, 0x44, 0x43]
 
-    /// Current format version.
-    public static let currentVersion: UInt16 = 1
+    /// Current format version. 2 added the audio track identifier.
+    public static let currentVersion: UInt16 = 2
+
+    /// `flags` bit 0: the entry names a specific audio track rather than the container's default.
+    private static let hasAudioTrackFlag: UInt16 = 1 << 0
 
     /// Fixed header size in bytes (before the variable-length URL).
-    public static let fixedHeaderSize = 56
+    public static let fixedHeaderSize = 64
 
     /// Byte offset of the freshness fields within the header.
     private static let freshnessOffset = 8
@@ -52,7 +60,7 @@ extension WaveformCacheFile {
 
         // Version (UInt16) + Flags (UInt16)
         appendValue(&data, currentVersion)
-        appendValue(&data, UInt16(0))
+        appendValue(&data, item.audioTrackID == nil ? UInt16(0) : hasAudioTrackFlag)
 
         // Freshness fields
         appendValue(&data, encodeDate(item.modificationDate))
@@ -67,6 +75,9 @@ extension WaveformCacheFile {
         appendValue(&data, channelCount)
         appendValue(&data, pointsPerChannel)
         appendValue(&data, urlByteCount)
+
+        // A flag rather than a sentinel, so every UInt64 stays a legal track identifier.
+        appendValue(&data, item.audioTrackID ?? 0)
 
         assert(data.count == fixedHeaderSize)
 
@@ -98,9 +109,11 @@ extension WaveformCacheFile {
 
         return try data.withUnsafeBytes { raw in
             let version: UInt16 = raw.load(fromByteOffset: 4, as: UInt16.self)
-            guard version <= currentVersion else {
+            guard version == currentVersion else {
                 throw NSError(description: "Unsupported waveform cache version: \(version)")
             }
+
+            let flags: UInt16 = raw.load(fromByteOffset: 6, as: UInt16.self)
 
             let modDate = decodeDate(raw.load(fromByteOffset: 8, as: Float64.self))
             let fileSize = decodeFileSize(raw.load(fromByteOffset: 16, as: Int64.self))
@@ -110,6 +123,10 @@ extension WaveformCacheFile {
             let channelCount = raw.load(fromByteOffset: 44, as: UInt32.self)
             let pointsPerChannel = raw.load(fromByteOffset: 48, as: UInt32.self)
             let urlByteCount = raw.load(fromByteOffset: 52, as: UInt32.self)
+
+            let audioTrackID: UInt64? = flags & hasAudioTrackFlag != 0
+                ? raw.load(fromByteOffset: 56, as: UInt64.self)
+                : nil
 
             let urlStart = fixedHeaderSize
             let urlEnd = urlStart + Int(urlByteCount)
@@ -160,6 +177,7 @@ extension WaveformCacheFile {
 
             return WaveformDataItem(
                 url: sourceURL,
+                audioTrackID: audioTrackID,
                 modificationDate: modDate,
                 fileSize: fileSize,
                 waveformData: waveformData
