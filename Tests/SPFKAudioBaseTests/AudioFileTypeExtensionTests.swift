@@ -79,6 +79,31 @@ struct AudioFileTypeExtensionTests {
         #expect(!AudioFileType.wav.isVideo)
     }
 
+    /// The listing of a file's audio tracks is gated on this alone, so anything `isVideo` answers
+    /// yes to has to be here — or a video container loses its picker on a property meant to widen
+    /// the set.
+    @Test("multi-audio-track types cover every video type")
+    func multiAudioTrackTypesCoverVideo() {
+        for type in AudioFileType.allCases where type.isVideo {
+            #expect(type.supportsMultipleAudioTracks, "\(type) is video but not multi-track capable")
+        }
+    }
+
+    /// The audio containers the video test misses: `.mka` and the MPEG-4 audio pair carry alternate
+    /// tracks, while a single-stream format must stay out to keep an import from opening an asset
+    /// per file for a choice that cannot exist.
+    @Test("multi-audio-track types include the audio containers that carry alternates")
+    func multiAudioTrackTypesIncludeAudioContainers() {
+        #expect(AudioFileType.mka.supportsMultipleAudioTracks)
+        #expect(AudioFileType.m4a.supportsMultipleAudioTracks)
+        #expect(AudioFileType.m4b.supportsMultipleAudioTracks)
+
+        #expect(!AudioFileType.wav.supportsMultipleAudioTracks)
+        #expect(!AudioFileType.mp3.supportsMultipleAudioTracks)
+        #expect(!AudioFileType.flac.supportsMultipleAudioTracks)
+        #expect(!AudioFileType.aiff.supportsMultipleAudioTracks)
+    }
+
     @Test("mimeType returns correct values")
     func mimeType() {
         #expect(AudioFileType.wav.mimeType == "audio/wav")

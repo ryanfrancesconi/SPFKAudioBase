@@ -74,6 +74,22 @@ public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
         Self.matroskaTypes.contains(self)
     }
 
+    /// Containers that can hold more than one audio track, and so can present a choice of which
+    /// one to play.
+    ///
+    /// **A superset of the `isVideo` types**, deliberately: `.mka` and `.m4a`/`.m4b` are audio
+    /// containers built on formats that carry alternate tracks as readily as their video siblings,
+    /// so a UTType-driven video test answers the wrong question here. Everything else in this enum
+    /// carries exactly one stream, where listing tracks costs an asset open per imported file and
+    /// can only ever name the track that would have played anyway.
+    public static let multiAudioTrackTypes: [AudioFileType] = [
+        .m4a, .m4b, .m4v, .mka, .mkv, .mov, .mp4, .ts, .webm,
+    ]
+
+    public var supportsMultipleAudioTracks: Bool {
+        Self.multiAudioTrackTypes.contains(self)
+    }
+
     /// File types with reliable XMP support via the Adobe XMP SDK smart handler.
     /// Formats not listed here either lack a smart handler or have no standard XMP embedding.
     public static let xmpTypes: [AudioFileType] = [
