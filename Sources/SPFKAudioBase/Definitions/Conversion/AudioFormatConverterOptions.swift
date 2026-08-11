@@ -116,7 +116,7 @@ public struct AudioFormatConverterOptions: Sendable {
     public init?(audioFile: AVAudioFile) {
         let streamDescription = audioFile.fileFormat.streamDescription.pointee
 
-        format = AudioFileType(rawValue: audioFile.url.pathExtension.lowercased())
+        format = AudioFileType(pathExtension: audioFile.url.pathExtension)
         sampleRate = streamDescription.mSampleRate
         bitsPerChannel = streamDescription.mBitsPerChannel
         channels = streamDescription.mChannelsPerFrame
