@@ -14,7 +14,7 @@ public struct AudioFormatConverterOptions: Sendable {
     public static let supportedOutputFormats: [AudioFileType] = [
         .wav, .aiff, .caf,
         .m4a, .mp3,
-        .flac, .ogg,
+        .flac, .ogg, .opus,
     ]
 
     public static let supportedOutputFormatsString: String = {
