@@ -290,7 +290,10 @@ extension AVAudioPCMBuffer {
     ///
     /// Operations are applied in pipeline order: trim → normalize → fade.
     /// Returns `self` unchanged when `edit.isEmpty` is true.
-    public func applying(_ edit: AudioEditDescription) throws -> AVAudioPCMBuffer {
+    /// - Parameter isPreTrimmed: the buffer already holds exactly `edit.trim`'s window, so the
+    ///   extract is skipped while the boundaries still get their de-click. For a caller that read
+    ///   only the window from disk rather than the whole file.
+    public func applying(_ edit: AudioEditDescription, isPreTrimmed: Bool = false) throws -> AVAudioPCMBuffer {
         guard !edit.isEmpty else { return self }
 
         // 5 ms de-click applied at trim boundaries to prevent pops from non-zero-crossing cuts.
@@ -300,9 +303,12 @@ extension AVAudioPCMBuffer {
         var trimmed = false
 
         if !edit.trim.isEmpty {
-            let start = edit.trim.inPoint
-            let end = edit.trim.outPoint > 0 ? edit.trim.outPoint : Double(buffer.frameLength) / buffer.format.sampleRate
-            buffer = try buffer.extract(from: start, to: end)
+            if !isPreTrimmed {
+                let start = edit.trim.inPoint
+                let end = edit.trim.outPoint > 0 ? edit.trim.outPoint : Double(buffer.frameLength) / buffer.format.sampleRate
+                buffer = try buffer.extract(from: start, to: end)
+            }
+
             trimmed = true
         }
 
