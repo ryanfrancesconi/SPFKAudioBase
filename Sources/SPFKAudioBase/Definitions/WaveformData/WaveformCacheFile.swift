@@ -9,7 +9,7 @@ import SPFKBase
 ///
 /// The fixed header contains all metadata needed for freshness checks and
 /// `WaveformData` reconstruction. Freshness fields (`modificationDate`,
-/// `fileSize`) are at fixed offsets 8–23 for fast partial reads.
+/// `fileSize`) sit early in the header so a partial read can reach them.
 ///
 /// **Only the current version is readable.** An entry written by an older build is a cache miss
 /// rather than a migration — this is a derived cache whose worst case is one re-scan, so carrying a
@@ -31,11 +31,24 @@ public struct WaveformCacheFile {
     /// Fixed header size in bytes (before the variable-length URL).
     public static let fixedHeaderSize = 64
 
-    /// Byte offset of the freshness fields within the header.
-    private static let freshnessOffset = 8
+    /// Byte offsets of each fixed-header field. `write` appends these in order rather than
+    /// addressing them, so the assert at the end of it is what ties the two halves together.
+    private enum Offset {
+        static let version = 4
+        static let flags = 6
+        static let modificationDate = 8
+        static let fileSize = 16
+        static let audioDuration = 24
+        static let sampleRate = 32
+        static let samplesPerPoint = 40
+        static let channelCount = 44
+        static let pointsPerChannel = 48
+        static let urlByteCount = 52
+        static let audioTrackID = 56
+    }
 
-    /// Number of bytes to read for freshness validation (magic + version + flags + date + size).
-    private static let freshnessReadSize = 24
+    /// Number of bytes to read for freshness validation: through the end of `fileSize`.
+    private static let freshnessReadSize = Offset.fileSize + MemoryLayout<Int64>.size
 
     private init() {}
 }
@@ -108,24 +121,24 @@ extension WaveformCacheFile {
         }
 
         return try data.withUnsafeBytes { raw in
-            let version: UInt16 = raw.load(fromByteOffset: 4, as: UInt16.self)
+            let version: UInt16 = raw.load(fromByteOffset: Offset.version, as: UInt16.self)
             guard version == currentVersion else {
                 throw NSError(description: "Unsupported waveform cache version: \(version)")
             }
 
-            let flags: UInt16 = raw.load(fromByteOffset: 6, as: UInt16.self)
+            let flags: UInt16 = raw.load(fromByteOffset: Offset.flags, as: UInt16.self)
 
-            let modDate = decodeDate(raw.load(fromByteOffset: 8, as: Float64.self))
-            let fileSize = decodeFileSize(raw.load(fromByteOffset: 16, as: Int64.self))
-            let audioDuration = raw.load(fromByteOffset: 24, as: Float64.self)
-            let sampleRate = raw.load(fromByteOffset: 32, as: Float64.self)
-            let samplesPerPoint = raw.load(fromByteOffset: 40, as: UInt32.self)
-            let channelCount = raw.load(fromByteOffset: 44, as: UInt32.self)
-            let pointsPerChannel = raw.load(fromByteOffset: 48, as: UInt32.self)
-            let urlByteCount = raw.load(fromByteOffset: 52, as: UInt32.self)
+            let modDate = decodeDate(raw.load(fromByteOffset: Offset.modificationDate, as: Float64.self))
+            let fileSize = decodeFileSize(raw.load(fromByteOffset: Offset.fileSize, as: Int64.self))
+            let audioDuration = raw.load(fromByteOffset: Offset.audioDuration, as: Float64.self)
+            let sampleRate = raw.load(fromByteOffset: Offset.sampleRate, as: Float64.self)
+            let samplesPerPoint = raw.load(fromByteOffset: Offset.samplesPerPoint, as: UInt32.self)
+            let channelCount = raw.load(fromByteOffset: Offset.channelCount, as: UInt32.self)
+            let pointsPerChannel = raw.load(fromByteOffset: Offset.pointsPerChannel, as: UInt32.self)
+            let urlByteCount = raw.load(fromByteOffset: Offset.urlByteCount, as: UInt32.self)
 
             let audioTrackID: UInt64? = flags & hasAudioTrackFlag != 0
-                ? raw.load(fromByteOffset: 56, as: UInt64.self)
+                ? raw.load(fromByteOffset: Offset.audioTrackID, as: UInt64.self)
                 : nil
 
             let urlStart = fixedHeaderSize
@@ -214,8 +227,8 @@ extension WaveformCacheFile {
         try validateMagic(headerData)
 
         return headerData.withUnsafeBytes { raw in
-            let modDate = decodeDate(raw.load(fromByteOffset: 8, as: Float64.self))
-            let fileSize = decodeFileSize(raw.load(fromByteOffset: 16, as: Int64.self))
+            let modDate = decodeDate(raw.load(fromByteOffset: Offset.modificationDate, as: Float64.self))
+            let fileSize = decodeFileSize(raw.load(fromByteOffset: Offset.fileSize, as: Int64.self))
             return FreshnessInfo(modificationDate: modDate, fileSize: fileSize)
         }
     }
@@ -229,13 +242,17 @@ extension WaveformCacheFile {
             throw NSError(description: "Waveform cache file too small for freshness update")
         }
 
-        // Overwrite modificationDate at offset 8
         var modDate = encodeDate(fileURL.modificationDate)
-        data.replaceSubrange(8 ..< 16, with: Data(bytes: &modDate, count: 8))
+        data.replaceSubrange(
+            Offset.modificationDate ..< Offset.fileSize,
+            with: Data(bytes: &modDate, count: MemoryLayout<Float64>.size)
+        )
 
-        // Overwrite fileSize at offset 16
         var size = encodeFileSize(fileURL.fileSize)
-        data.replaceSubrange(16 ..< 24, with: Data(bytes: &size, count: 8))
+        data.replaceSubrange(
+            Offset.fileSize ..< Offset.audioDuration,
+            with: Data(bytes: &size, count: MemoryLayout<Int64>.size)
+        )
 
         try data.write(to: cacheURL, options: .atomic)
     }
