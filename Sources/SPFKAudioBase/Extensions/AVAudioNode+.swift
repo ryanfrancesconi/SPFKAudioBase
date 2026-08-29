@@ -45,10 +45,38 @@ extension AVAudioNode: @retroactive TypeDescribable {
         return out
     }
 
-    public var isOutputNodeConnected: Bool {
+    /// Whether this node has any output connection on bus 0.
+    ///
+    /// A connection to a node that itself goes nowhere still counts. Use `reachesOutput` to ask
+    /// whether audio leaving this node arrives anywhere audible.
+    public var hasOutputConnection: Bool {
         guard let engine else { return false }
         let points = engine.outputConnectionPoints(for: self, outputBus: 0)
         return points.isNotEmpty
+    }
+
+    /// Whether a walk of bus 0's output connections arrives at the engine's output node.
+    ///
+    /// Nodes attached to another engine are not followed, and a cycle in the graph terminates the
+    /// walk rather than looping.
+    public var reachesOutput: Bool {
+        guard let engine else { return false }
+        var visited = Set<ObjectIdentifier>()
+        return reachesOutput(in: engine, visited: &visited)
+    }
+
+    private func reachesOutput(in engine: AVAudioEngine, visited: inout Set<ObjectIdentifier>) -> Bool {
+        guard self.engine === engine else { return false }
+        guard visited.insert(ObjectIdentifier(self)).inserted else { return false }
+
+        for point in engine.outputConnectionPoints(for: self, outputBus: 0) {
+            guard let node = point.node else { continue }
+
+            if node === engine.outputNode { return true }
+            if node.reachesOutput(in: engine, visited: &visited) { return true }
+        }
+
+        return false
     }
 }
 
