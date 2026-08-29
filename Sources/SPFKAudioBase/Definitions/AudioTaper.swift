@@ -5,11 +5,11 @@ import CoreGraphics
 
 /// Describes the shape of a fade or gain-ramp curve via a power-law exponent and a blend weight.
 ///
-/// `value` sets the curvature exponent and `skew` adjusts the curve shape by blending
-/// between curve variants. The exact blend formula is consumer-specific: PCM buffer fading
-/// blends the power-law curve with a linear ramp, while parameter automation blends the
-/// forward curve with its inverse (concave ↔ convex). Use the named presets rather than
-/// constructing raw values — the two properties are only meaningful together.
+/// `value` sets the curvature exponent and `skew` blends that power curve with its own
+/// inverse (concave ↔ convex). Every consumer — PCM buffer fading, parameter automation
+/// and the drawn overlay — evaluates ``gain(at:)`` / ``fadeOutGain(at:)``, so a fade renders
+/// as it was auditioned. Use the named presets rather than constructing raw values — the
+/// two properties are only meaningful together.
 public struct AudioTaper: Codable, Equatable, Sendable {
     /// Power-law exponent. Values > 1 produce a concave (slow-start) curve;
     /// values < 1 produce a convex (fast-start) curve; 1 is linear.

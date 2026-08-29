@@ -143,14 +143,12 @@ extension AVAudioPCMBuffer {
                 // normalized position in [0, 1] across the fade-in region
                 // fadeInSamples > 0 is guaranteed: i >= 0 and i < fadeInSamples implies fadeInSamples >= 1
                 let t = Double(i + 1) / Double(fadeInSamples)
-                let skewed = pow(t, Double(inTaper.value))
-                gain = Float((skewed * Double(1 - inTaper.skew) + t * Double(inTaper.skew)).clamped(to: Double.unitIntervalRange))
+                gain = Float(inTaper.gain(at: t))
             } else if i >= fadeOutStart, outTime > 0, fadeOutSamples > 0 {
                 // normalized position in [0, 1] across the fade-out region (0 = start of fade, 1 = silence)
                 // fadeOutSamples > 0 guards against division by zero when outTime is positive but sub-sample
                 let t = Double(i - fadeOutStart + 1) / Double(fadeOutSamples)
-                let skewed = pow(t, Double(outTaper.inverseValue))
-                gain = Float((1.0 - (skewed * Double(1 - outTaper.skew) + t * Double(outTaper.skew))).clamped(to: Double.unitIntervalRange))
+                gain = Float(outTaper.fadeOutGain(at: t))
             } else {
                 gain = 1.0
             }
