@@ -3,67 +3,35 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-audio-base%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ryanfrancesconi/spfk-audio-base)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-audio-base%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/ryanfrancesconi/spfk-audio-base)
 
-Shared audio types, AVFoundation extensions, and processing utilities for the SPFK package ecosystem. Provides the foundational layer used by [SPFKTempo](https://github.com/ryanfrancesconi/spfk-tempo), [SPFKLoudness](https://github.com/ryanfrancesconi/spfk-loudness), [SPFKMusicalAnalysis](https://github.com/ryanfrancesconi/spfk-musical-analysis), and other packages.
+Shared audio types, AVFoundation extensions and processing utilities for the SPFK package ecosystem
+— the foundational layer under [spfk-tempo](https://github.com/ryanfrancesconi/spfk-tempo),
+[spfk-loudness](https://github.com/ryanfrancesconi/spfk-loudness),
+[spfk-musical-analysis](https://github.com/ryanfrancesconi/spfk-musical-analysis) and the rest.
 
-## Core Types
+## Requirements
 
-### Bpm
+- **Platforms:** macOS 13+, iOS 16+
+- **Swift:** 6.2+
 
-A tempo value in beats per minute with octave-equivalent matching.
+## Core types
 
-```swift
-let tempo = Bpm(120)!
+| Type | Description |
+|------|-------------|
+| **`AudioFileType`** | Every audio format the products handle, with its Core Audio, `UTType` and MIME mappings |
+| **`Bpm`** | A tempo in beats per minute, with octave-equivalent matching and a tolerance |
+| **`LoudnessDescription`** | EBU R128 metrics — integrated, range, true peak, max momentary and short-term — with averaging across files |
+| **`NoteName`** / **`MusicalTonality`** | Chromatic note names with enharmonics, and major/minor |
+| **`CountableResult`** | Consensus voting for iterative analysis, with early exit once a value reaches the required number of matches |
+| **`BufferPeak`** | A peak measurement over a buffer |
+| **`AudioTaper`** | The shape of a fade or gain ramp |
+| **`RealTimeDomain`** | Time display strings, and parsing them back |
+| **`AudioDefaults`** | The system audio format, as an actor |
 
-tempo.quarterNoteDuration  // 0.5 seconds
-tempo.multiples            // [15, 30, 60, 120, 240, 480, 960]
-tempo.isMultiple(of: 60)   // true (120 is 2x of 60)
-tempo.isMultiple(of: Bpm(61)!, tolerance: 2.0)  // true (within ±2 BPM)
-```
-
-### LoudnessDescription
-
-EBU R128 loudness metrics for audio files.
-
-```swift
-var loudness = LoudnessDescription()
-loudness.loudnessIntegrated = -24.13    // LUFS
-loudness.loudnessRange = 1.43           // LU
-loudness.maxTruePeakLevel = -0.07       // dBTP
-loudness.maxMomentaryLoudness = -19.51  // LUFS
-loudness.maxShortTermLoudness = -22.99  // LUFS
-
-loudness.isValid       // true
-loudness.stringValue   // "I -24.1 LUFS, TP -0.1 dB, LRA 1.4 LU, M -19.5 LU, S -23.0 LU"
-
-// Average across files
-let average = [loudness1, loudness2, loudness3].average
-```
-
-### AudioFileType
-
-Enum representing audio formats with Core Audio, UTType, and MIME type mappings.
-
-```swift
-let type = AudioFileType(pathExtension: "m4a")
-type?.fileTypeName       // "Apple MPEG-4 Audio"
-type?.avFileType         // .m4a
-type?.utType             // .mpeg4Audio
-type?.mimeType           // "audio/mp4"
-type?.isAudio            // true
-type?.isPCM              // false
-type?.supportsMetadata   // true
-```
+### AudioFileType capability
 
 Capability is answered per question rather than by one "supported" flag, because the answers
 genuinely differ by format — `supportsMetadata`, `supportsXMP`, `supportsBEXT`, `supportsIXML`,
 `isAVAudioFileWritable`, `isMatroska`.
-
-```swift
-let mkv = AudioFileType(pathExtension: "mkv")
-mkv?.isMatroska          // true
-mkv?.supportsMetadata    // true  — TagLib 2.x has a full Matroska implementation
-mkv?.avFileType          // nil   — AVFoundation cannot open it at all
-```
 
 **`isMatroska` covers `.mka`, `.mkv` and `.webm`** (WebM is a Matroska profile, so one parser
 serves all three). These are the formats absent from `AVURLAsset.audiovisualTypes()`, where
@@ -72,185 +40,82 @@ has to route to the demuxer in
 [spfk-matroska](https://github.com/ryanfrancesconi/spfk-matroska) instead. Metadata is unaffected
 by that limit, which is why they are in `metadataTypes` while having no `avFileType`.
 
-### CountableResult
+### AudioTaper
 
-Generic consensus voting for iterative analysis with early exit.
+`value` sets the curvature exponent and `skew` blends that power curve with its own inverse,
+concave against convex. Every consumer — PCM buffer fading, parameter automation, and the drawn
+overlay — evaluates the same gain function, so a fade renders as it was auditioned. Use the named
+presets rather than raw values; the two properties are only meaningful together.
 
-```swift
-var results = CountableResult<Int>(matchesRequired: 3)
+## Edits
 
-results.append(120)  // false
-results.append(121)  // false
-results.append(120)  // false
-results.append(120)  // true — 120 reached 3 matches
+Non-destructive edits are described here and rendered elsewhere, so a pending edit can be persisted
+with the element and survive a relaunch.
 
-results.suggestedValue  // 120
-results.choose()        // 120 (most frequent)
-```
+| Type | Description |
+|------|-------------|
+| **`AudioEditDescription`** | The pending edits on a file. Applied in pipeline order: trim, normalize, fade |
+| **`FadeDescription`** | In and out times, and the taper each uses |
+| **`NormalizeDescription`** / **`NormalizeMode`** / **`NormalizeOptions`** | Target level and how it is measured |
 
-### NoteName and MusicalTonality
+A `nil` description means no edits are queued, and one with all-default values is functionally the
+same thing. It is cleared once the edit has been rendered and written.
 
-Chromatic note names and tonality for musical key detection.
+## Conversion
 
-```swift
-let note = NoteName(string: "Db")  // .cSharp
-note?.description                  // "C#"
-note?.enharmonic                   // "Db"
+| Type | Description |
+|------|-------------|
+| **`AudioFormatConverterOptions`** | Format, sample rate, bit depth and bit rate for a conversion. Any property left `nil` adopts the input file's value; `bitRate` states a stereo rate, halved for mono |
+| **`BitDepthRule`** | Whether the converter may go above the source's bit depth |
+| **`AudioEditHandling`** | What happens to pending edits during an export |
+| **`FileConflictScheme`** | What to do when the destination exists |
+| **`MetadataCopyScheme`** | Which metadata categories travel with a conversion |
+| **`PasteAttributesOptions`** | Which sections and which individual fields a Paste Attributes transfers |
 
-let tonality = MusicalTonality(string: "minor")  // .minor
-```
+`PasteAttributesOptions` has section-level flags plus per-section exclusion sets, so a field can be
+skipped while its section stays on.
 
-## Audio File Scanning
+## Scanning and detection
 
-`AudioFileScanner` streams an audio file in fixed-size chunks with progress reporting. Used by analysis engines (BPM, loudness, musical key) to process audio incrementally.
+| Type | Description |
+|------|-------------|
+| **`AudioFileScanner`** | Streams a file in fixed-size chunks with progress, for analysis engines that work incrementally |
+| **`AudioSilenceScanner`** | Locates silence boundaries and non-silent regions, with a vDSP peak-magnitude fast path that skips silent chunks without per-frame inspection, so memory stays constant whatever the file length |
+| **`SegmentDetector`** / **`SegmentDetectorOptions`** | Non-silent regions as time-ordered trims, with gap bridging, a minimum length and boundary padding |
+| **`AudioTools`** | Looping a file that is too short for an analysis window to have enough material |
+| **`URLProgressEvent`** | Per-file progress from any of the above |
 
-```swift
-let scanner = AudioFileScanner(
-    bufferDuration: 0.5,
-    sendPeriodicProgressEvery: 4,
-    minimumDuration: 15   // loop short files in-memory
-) { event in
-    switch event {
-    case .progress(let url, let value):
-        print("\(url.lastPathComponent): \(value)")
-    case .data(let format, let length, let samples):
-        // process PCM samples
-        break
-    case .periodicProgress(let url, let value):
-        // run intermediate analysis
-        break
-    case .complete(let url):
-        print("Done: \(url.lastPathComponent)")
-    }
-}
+`AudioFileScanner` can loop short files in memory: when a `minimumDuration` is set and the file is
+shorter than half of it, the scanner seeks back to frame 0 rather than ending, giving algorithms
+with a minimum input length enough to work with.
 
-try await scanner.process(url: audioFileURL)
-```
+## Playback sources
 
-When `minimumDuration` is set and the file is shorter than half that value, the scanner loops by seeking back to frame 0, providing enough material for algorithms that require a minimum input length.
+`SeekablePCMSource` extends `spfk-base`'s `SequentialPCMSource` with exactly one thing: a playhead
+the user can move. Positions are frames of the processing format counted from the start of the
+source.
 
-## Waveform Visualization
+A conformer holds a position in a file and is emphatically not safe to drive from two places at
+once, so it is expected to be `@unchecked Sendable` with that invariant stated. What the conformance
+buys is that a player can hand one to a feed `Task` — the alternative being a serial dispatch queue,
+which is the GCD this codebase has otherwise removed.
 
-Parse audio files into drawing-ready waveform data at multiple resolution levels.
+## Audio unit state
 
-```swift
-let parser = WaveformDataParser(resolution: .medium)
-let waveform = try await parser.parse(url: audioFileURL)
+`AudioUnitChainState` and `AudioUnitInsert` persist an effects chain — which units, in which order,
+with which saved state — so a workspace reopens with the chain it had.
 
-waveform.channelCount     // 2
-waveform.audioDuration     // 180.5
-waveform.samplesPerPoint   // 64 (.medium)
+## AVFoundation extensions
 
-// Extract a time range
-let segment = try waveform.subdata(in: 10.0 ..< 20.0)
-```
-
-Resolution levels control the tradeoff between detail and data size:
-
-| Resolution | Samples per Point | Best For |
-|------------|------------------|----------|
-| `.lossless` | 1 | Full-resolution editing |
-| `.veryHigh` | 16 | Detailed zoomed views |
-| `.high` | 32 | Standard waveform display |
-| `.medium` | 64 | Overview display |
-| `.low` | 128 | Thumbnail views |
-
-## AVFoundation Extensions
-
-### AVAudioPCMBuffer
-
-```swift
-let buffer = try AVAudioPCMBuffer(url: audioFileURL)
-
-buffer.duration        // seconds
-buffer.rmsValue        // RMS across all channels
-buffer.isSilent        // true if all samples are zero
-
-// Processing
-let normalized = try buffer.normalize()
-let reversed = try buffer.reverse()
-let faded = try buffer.fade(inTime: 0.1, outTime: 0.5)
-let converted = try buffer.convert(to: targetFormat)
-let peak = try buffer.peak()
-
-// Editing
-let segment = try buffer.extract(from: 1.0, to: 5.0)
-let looped = try buffer.loop(numberOfDuplicates: 3)
-try buffer.append(otherBuffer)
-try buffer.write(to: outputURL)
-```
-
-### AVAudioFile
-
-```swift
-let file = try AVAudioFile(forReading: url)
-
-file.duration              // seconds
-file.dataRate              // kbps (estimated)
-try await file.estimatedDataRate()  // kbps (accurate)
-
-let buffer = try file.toAVAudioPCMBuffer()
-let partial = try file.toAVAudioPCMBuffer(maxDuration: 10)
-let channelData = try file.toFloatChannelData()
-```
-
-### AVAudioFormat
-
-```swift
-format.readableDescription  // "44100 Hz, 16-bit, Stereo"
-format.bitsPerChannel       // 16
-format.bitRate              // 1411200.0
-
-AVAudioFormat.createPCMFormat(bitsPerChannel: 24, channels: 2, sampleRate: 96000)
-```
-
-### AVAudioEngine
-
-```swift
-engine.outputFormat
-engine.maxFramesPerSlice
-
-engine.safeAttach(nodes: [mixer, effect])
-engine.safeDetach(nodes: [mixer, effect])
-engine.connectAndAttach(source, to: destination, format: format)
-```
-
-### AVAudioNode
-
-```swift
-node.resolvedName              // human-readable name
-node.isOutputNodeConnected     // true if has output
-node.ioConnectionDescription   // ASCII-art connection visualization
-
-try node.disconnectOutput()
-try node.disconnectInput()
-try await node.disconnect(input: specificInput)
-```
-
-## System Audio Configuration
-
-`AudioDefaults` manages the system audio format as a thread-safe actor:
-
-```swift
-await AudioDefaults.shared.update(systemFormat: deviceFormat)
-await AudioDefaults.shared.sampleRate  // 48000.0
-await AudioDefaults.shared.isSupported(sampleRate: 22050)  // depends on enforcement
-```
-
-## Time Formatting
-
-`RealTimeDomain` provides time display string formatting:
-
-```swift
-RealTimeDomain.string(seconds: 3661.5)
-// "1:01:01.500"
-
-RealTimeDomain.string(seconds: 125.0, showHours: false, showMilliseconds: false)
-// "2:05"
-
-RealTimeDomain.seconds(string: "1:30.250")
-// 90.25
-```
+| Extension on | What it adds |
+|------|-------------|
+| **`AVAudioPCMBuffer`** | Duration, RMS, silence check; normalize, reverse, fade, convert and peak; extract a range, loop, append and write |
+| **`AVAudioFile`** | Duration, estimated and accurate data rate, conversion to a buffer (whole or capped) or to float channel data |
+| **`AVAudioFormat`** | A readable description, bits per channel, bit rate, and PCM format construction |
+| **`AVAudioEngine`** | Output format, max frames per slice, and safe attach/detach/connect |
+| **`AVAudioNode`** | A resolved name, output-connection check, an ASCII connection diagram, and disconnecting inputs and outputs |
+| **`AudioComponentDescription`** | Identity and a stable UID for an audio unit |
+| **`AUValue`**, **`AVAudioTime`**, **`TimeInterval`** | dB and linear conversion, host time, normalization |
 
 ## Dependencies
 
@@ -258,11 +123,6 @@ RealTimeDomain.seconds(string: "1:30.250")
 |---------|---------|
 | [spfk-base](https://github.com/ryanfrancesconi/spfk-base) | Core utilities, logging, type extensions |
 | [spfk-testing](https://github.com/ryanfrancesconi/spfk-testing) | Test audio resources (test target only) |
-
-## Requirements
-
-- **Platforms:** macOS 13+, iOS 16+
-- **Swift:** 6.2+
 
 ## About
 
