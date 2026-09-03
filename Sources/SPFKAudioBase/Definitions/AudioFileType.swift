@@ -6,7 +6,13 @@ import Foundation
 
 // swiftformat:disable consecutiveSpaces
 
-/// Common audio formats used by the SPFK system
+/// Container formats audio can be read from — including the video containers that carry it, which
+/// is what puts `.mov`, `.mkv`, `.m4v`, `.webm` and `.ts` here alongside `.wav` and `.mp3`.
+///
+/// **Membership describes the container, not a file.** An `.mp4` with no audio track is in this
+/// set; confirm with `AVURLAsset.hasAudio()` before treating one as playable. The same split
+/// applies to ``isVideo``, which reports what the container can hold rather than what it does —
+/// `VideoTrackReader` answers that.
 public enum AudioFileType: String, Hashable, CaseIterable, Sendable, Codable {
     case aac
     case aifc
